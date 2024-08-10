@@ -31,15 +31,16 @@ def action(text):
 Определи, к какой характеристике относится следующий текст: {text}.
 ВАЖНО: выведи только ответ в виде одного слова с маленькой буквы.
 ''')
+    diff = int(chat_gpt(f'Оцени сложность действия по шкале от 2 до 30: {text}. ВАЖНО: выведи только ответ в виде числа'))
     dice = dice_roll()
-    print(stat, stats[stat], dice)
-    if stats[stat] >= dice:
+    print(f'{stat}: {stats[stat]}+{dice} vs {diff}')
+    if (stats[stat] + dice >= diff and dice != 1) or dice == 20:
         print('Успех!')
         print(chat_gpt(f'Придумай хороший исход для этого события {text}'))
-    else:
+    elif (stats[stat]+dice < diff and dice != 20) or diff == 1:
         print('Провал...')
         print(chat_gpt(f'Придумай плохой исход для этого события {text}'))
     return
 
 
-action(input('Ваше действие:'))
+action(input('Ваше действие: '))
