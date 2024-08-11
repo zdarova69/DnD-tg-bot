@@ -9,7 +9,9 @@ from aiogram.filters import CommandStart
 from aiogram.types import Message
 from aiogram.filters import Command
 
-from gen_message import generate_messange
+# from gen_message import generate_message
+from translater import ru, en
+from model import save, generate
 
 # Открываем файл в режиме чтения
 with open('tg_api.txt', 'r') as file:
@@ -73,8 +75,8 @@ async def echo_handler(message: Message) -> None:
     """
     try:
         # Send a copy of the received message
-        print(message.text)
-        await message.reply(await generate_messange(message.text))
+        await save(message.text)
+        await message.reply(await generate(message.text))
     except TypeError:
         # But not all the types is supported to be copied so need to handle it
         await message.answer("Nice try!")

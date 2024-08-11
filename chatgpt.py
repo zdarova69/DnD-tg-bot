@@ -1,46 +1,39 @@
+import os
 from openai import OpenAI
-from game_cube import dice_roll
-
-client = OpenAI(
-    # defaults to os.environ.get("OPENAI_API_KEY")
-    base_url='https://api.openai.com/v1',
-    api_key=open('openai_token').readline(),
-)
+import random
+from dice import action
+from cl import client
 
 
-def chat_gpt(prompt):
-    response = client.chat.completions.create(
-        model="gpt-4",
-        messages=[{"role": "user", "content": prompt}]
+
+async def generate_message(prompt):
+    exodus = await action(prompt)
+    prompt = prompt + exodus
+    print(prompt)
+    chat_completion = client.chat.completions.create(
+        model="gpt-4o-mini", 
+        messages=[
+            {"role": "system", "content": "Ты - гейм-мастер игры по Dungeon and Dragons. ты можешь иногда получать в сообщении POSITIVE или NEGATIVE - это будет означать, что ты должен будешь создать позитивное или негативное продолжение событий"},
+            {"role": "user", "content": prompt},
+        ]
     )
-    return response.choices[0].message.content.strip()
+    print(chat_completion.choices[0].message.content)
+    return chat_completion.choices[0].message.content
 
 
-stats = {
-    'сила': 10,
-    'выносливость': 0,
-    'интеллект': 0,
-    'мудрость': 10,
-    'харизма': 20,
-}
+
+async def generate_image(prompt):
+    response = client.images.generate(
+        model="dall-e-2",
+        prompt=prompt,
+        # style='vivid',
+        n=1,
+        size="512x512"
+
+)
+    return response.data[0].url
+
+# print(generate_message('я читаю заклинание чтобы поднять камень'))
+# print(generate_image('эльф лучник сидит в лесу на дереве'))
 
 
-def action(text):
-    stat = chat_gpt(f'''
-Есть характеристики: сила, выносливость, интеллект, мудрость и харизма. 
-Определи, к какой характеристике относится следующий текст: {text}.
-ВАЖНО: выведи только ответ в виде одного слова с маленькой буквы.
-''')
-    diff = int(chat_gpt(f'Оцени сложность действия по шкале от 2 до 30: {text}. ВАЖНО: выведи только ответ в виде числа'))
-    dice = dice_roll()
-    print(f'{stat}: {stats[stat]}+{dice} vs {diff}')
-    if (stats[stat] + dice >= diff and dice != 1) or dice == 20:
-        print('Успех!')
-        print(chat_gpt(f'Придумай хороший исход для этого события {text}'))
-    elif (stats[stat]+dice < diff and dice != 20) or diff == 1:
-        print('Провал...')
-        print(chat_gpt(f'Придумай плохой исход для этого события {text}'))
-    return
-
-
-action(input('Ваше действие: '))
