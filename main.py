@@ -12,9 +12,7 @@ from aiogram.types import Message
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
-from aiogram.types import ReplyKeyboardRemove, \
-    ReplyKeyboardMarkup, KeyboardButton, \
-    InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.types import ReplyKeyboardRemove, ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton
 # from gen_message import generate_message
 from translater import ru, en
 from model import save, generate
@@ -52,8 +50,9 @@ class CharacterCreation(StatesGroup):
     constitution = State()
     intelligence = State()
     wisdom = State()
+    charisma = State()
 
-@dp.message(Command('create_characters'))
+@dp.message(Command('create_character'))
 async def command_start(message: Message, state: FSMContext) -> None:
     await state.set_state(CharacterCreation.name)
     await message.answer(
@@ -165,9 +164,16 @@ async def process_constitution(message: types.Message, state: FSMContext):
 @dp.message(CharacterCreation.intelligence)
 async def process_intelligence(message: types.Message, state: FSMContext):
     await state.update_data(intelligence=int(message.text))
+    await state.set_state(CharacterCreation.charisma)
+    await message.reply("Укажи хаоизму:")
+
+
+@dp.message(CharacterCreation.charisma)
+async def process_intelligence(message: types.Message, state: FSMContext):
+    await state.update_data(charisma=int(message.text))
     await state.set_state(CharacterCreation.wisdom)
     await message.reply("Укажи мудрость:")
-    
+
 
 @dp.message(CharacterCreation.wisdom)
 async def process_wisdom(message: types.Message, state: FSMContext):
@@ -191,8 +197,16 @@ async def process_wisdom(message: types.Message, state: FSMContext):
         json.dump(character, f, ensure_ascii=False)
 
     await message.reply("Персонаж создан и сохранен!")
-    await state.finish()
+    current_state = await state.get_state()
 
+    if current_state is None:
+        return
+    logging.info("Cancelling state %r", current_state)
+    await state.clear()
+    await message.answer(
+        "Cancelled.",
+        reply_markup=ReplyKeyboardRemove(),
+    )
 @dp.message()
 async def echo_handler(message: Message) -> None:
     """
