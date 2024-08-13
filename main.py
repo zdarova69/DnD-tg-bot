@@ -203,10 +203,27 @@ async def process_wisdom(message: types.Message, state: FSMContext):
         return
     logging.info("Cancelling state %r", current_state)
     await state.clear()
-    await message.answer(
-        "Cancelled.",
-        reply_markup=ReplyKeyboardRemove(),
-    )
+stats = {
+    'сила': 10,
+    'выносливость': 0,
+    'интеллект': 0,
+    'мудрость': 10,
+    'харизма': 10,
+}
+
+
+@dp.message(Command("stats"))
+async def stats_show(message: Message):
+    stats_message = f'''
+Характеристики:
+Сила - {stats['сила']} очк.
+Выносливость - {stats['выносливость']} очк.
+Интеллект - {stats['интеллект']} очк.
+Мудрость - {stats['мудрость']} очк.
+Харизма - {stats['харизма']} очк.
+    '''
+    await message.reply(stats_message)
+
 @dp.message()
 async def echo_handler(message: Message) -> None:
     """
