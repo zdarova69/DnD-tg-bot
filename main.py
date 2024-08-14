@@ -42,6 +42,7 @@ async def command_start_handler(message: Message) -> None:
 Позволь нам рассказать одну историю, но сперва давай определимся с главным героем - /create_character.
 А когда ты будешь готов, введи что-нибудь вроде "начать игру", и тогда мы начнем рассказ.
 А что будет дальше....решать тебе.
+<a href="https://github.com/zdarova69/DnD-tg-bot">(А вот наш репозиторий)</a>
     '''
     await message.answer(greeting)
 
