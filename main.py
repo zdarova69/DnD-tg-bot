@@ -37,7 +37,12 @@ async def command_start_handler(message: Message) -> None:
     # and the target chat will be passed to :ref:`aiogram.methods.send_message.SendMessage`
     # method automatically or call API method directly via
     # Bot instance: `bot.send_message(chat_id=message.chat.id, ...)`
-    greeting = '''Привет, я DnD бот. могу придумать тебе историю'''
+    greeting = '''
+Привет, путник. Мы, два разраба, рады, что ты заскочил к нам.
+Позволь нам рассказать одну историю, но сперва давай определимся с главным героем - /create_character.
+А когда ты будешь готов, введи что-нибудь вроде "начать игру", и тогда мы начнем рассказ.
+А что будет дальше....решать тебе.
+    '''
     await message.answer(greeting)
 
 
@@ -169,7 +174,6 @@ async def process_dexterity(message: types.Message, state: FSMContext):
         await message.reply(f"Ошибка: текст не является целым числом")
     
 
-
 @dp.message(CharacterCreation.constitution)
 async def process_constitution(message: types.Message, state: FSMContext):
     global i  # Объявляем, что будем использовать глобальную переменную i
@@ -209,7 +213,6 @@ async def process_intelligence(message: types.Message, state: FSMContext):
         await message.reply(f"Ошибка: текст не является целым числом")
     
 
-
 @dp.message(CharacterCreation.charisma)
 async def process_charisma(message: types.Message, state: FSMContext):
     global i  # Объявляем, что будем использовать глобальную переменную i
@@ -228,7 +231,6 @@ async def process_charisma(message: types.Message, state: FSMContext):
         await message.reply(f"Ошибка: текст не является целым числом")
     
 
-
 @dp.message(CharacterCreation.wisdom)
 async def process_wisdom(message: types.Message, state: FSMContext):
     global i  # Объявляем, что будем использовать глобальную переменную i
@@ -244,8 +246,8 @@ async def process_wisdom(message: types.Message, state: FSMContext):
             await state.set_state(CharacterCreation.background)
             await message.reply(f"Укажи мудрость: максимум 18\n(осталось {i} очков)")
     except (ValueError, ZeroDivisionError) as e:
-        await message.reply(f"Ошибка: текст не является целым числом")  
-    await message.reply("Укажи мудрость:")
+        await message.reply(f"Ошибка: текст не является целым числом")
+
 
 @dp.message(CharacterCreation.background)
 async def process_background(message: types.Message, state: FSMContext):
@@ -278,14 +280,6 @@ async def complete_customization(message: types.Message, state: FSMContext):
 
     await message.reply("Подождите...")
     current_state = await state.get_state()
-    await message.reply(await generate(f'''
-Запомни, вот главный герой:
-Имя - {data['name']}
-Раса - {data['race']}
-Класс - {data['char_class']}
-Предыстория:
-{data['background']}
-    ''', user_id=user_id))
     await message.reply(f'''
 Персонаж создан и сохранен!
 Имя - {data['name']},
@@ -298,9 +292,17 @@ async def complete_customization(message: types.Message, state: FSMContext):
 Интеллект - {data['intelligence']},
 Харизма - {data['charisma']},
 Мудрость - {data['wisdom']},
-Предыстория:
-{data['background']}
+<b>Предыстория</b>:
+<i>{data['background']}</i>
     ''')
+    await message.reply(await generate(f'''
+    Запомни, вот главный герой:
+    Имя - {data['name']}
+    Раса - {data['race']}
+    Класс - {data['char_class']}
+    Предыстория:
+    {data['background']}
+        ''', user_id=user_id))
     if current_state is None:
         return
     logging.info("Cancelling state %r", current_state)
