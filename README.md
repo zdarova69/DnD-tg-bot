@@ -9,5 +9,6 @@
 - Добавляет визуальное оформление для каждого нового события.
 - Оценка действий игрока исходя из описания, характеристик игрока и броска 20-гранника.
 Таким образом, мы восстанавливаем основные аспекты "Dungeons & Dragons", за которые её любят и добавляем актуальные решения в виде генерации истории искусственным интеллектом
+Презентация: https://docs.google.com/presentation/d/1tPynOu0KxguKZ2w5q2NWA7oK6SZlF33P/edit?usp=sharing&ouid=109357479781112695684&rtpof=true&sd=true
 ![Screenshot 2024-08-14 202515](https://github.com/user-attachments/assets/ff09b1fa-4dec-4d05-99b6-29b299b7990f)
 ![Screenshot 2024-08-14 202524](https://github.com/user-attachments/assets/47018324-9a2e-4377-8091-a1813049212f)
