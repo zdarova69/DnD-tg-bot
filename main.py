@@ -16,7 +16,8 @@ from aiogram.types import ReplyKeyboardRemove, ReplyKeyboardMarkup, KeyboardButt
 # from gen_message import generate_message
 # from translater import ru, en
 from model import save, generate
-
+from chatgpt import generate_image
+from download_photo import get_image
 # Открываем файл в режиме чтения
 with open('tg_api.txt', 'r') as file:
     # Читаем содержимое файла
@@ -37,13 +38,7 @@ async def command_start_handler(message: Message) -> None:
     # and the target chat will be passed to :ref:`aiogram.methods.send_message.SendMessage`
     # method automatically or call API method directly via
     # Bot instance: `bot.send_message(chat_id=message.chat.id, ...)`
-    greeting = '''
-Привет, путник. Мы, два разраба, рады, что ты заскочил к нам.
-Позволь нам рассказать одну историю, но сперва давай определимся с главным героем - /create_character.
-А когда ты будешь готов, введи что-нибудь вроде "начать игру", и тогда мы начнем рассказ.
-А что будет дальше....решать тебе.
-<a href="https://github.com/zdarova69/DnD-tg-bot">(А вот наш репозиторий)</a>
-    '''
+    greeting = '''Привет, я DnD бот. могу придумать тебе историю'''
     await message.answer(greeting)
 
 
@@ -175,6 +170,7 @@ async def process_dexterity(message: types.Message, state: FSMContext):
         await message.reply(f"Ошибка: текст не является целым числом")
     
 
+
 @dp.message(CharacterCreation.constitution)
 async def process_constitution(message: types.Message, state: FSMContext):
     global i  # Объявляем, что будем использовать глобальную переменную i
@@ -214,6 +210,7 @@ async def process_intelligence(message: types.Message, state: FSMContext):
         await message.reply(f"Ошибка: текст не является целым числом")
     
 
+
 @dp.message(CharacterCreation.charisma)
 async def process_charisma(message: types.Message, state: FSMContext):
     global i  # Объявляем, что будем использовать глобальную переменную i
@@ -232,6 +229,7 @@ async def process_charisma(message: types.Message, state: FSMContext):
         await message.reply(f"Ошибка: текст не является целым числом")
     
 
+
 @dp.message(CharacterCreation.wisdom)
 async def process_wisdom(message: types.Message, state: FSMContext):
     global i  # Объявляем, что будем использовать глобальную переменную i
@@ -247,8 +245,7 @@ async def process_wisdom(message: types.Message, state: FSMContext):
             await state.set_state(CharacterCreation.background)
             await message.reply(f"Укажи мудрость: максимум 18\n(осталось {i} очков)")
     except (ValueError, ZeroDivisionError) as e:
-        await message.reply(f"Ошибка: текст не является целым числом")
-
+        await message.reply(f"Ошибка: текст не является целым числом")  
 
 @dp.message(CharacterCreation.background)
 async def process_background(message: types.Message, state: FSMContext):
@@ -281,6 +278,15 @@ async def complete_customization(message: types.Message, state: FSMContext):
 
     await message.reply("Подождите...")
     current_state = await state.get_state()
+    text_start = await generate(f'''
+Запомни, вот главный герой:
+Имя - {data['name']}
+Раса - {data['race']}
+Класс - {data['char_class']}
+Предыстория:
+{data['background']}
+    ''', user_id=user_id)
+    await message.reply(text_start)
     await message.reply(f'''
 Персонаж создан и сохранен!
 Имя - {data['name']},
@@ -293,17 +299,9 @@ async def complete_customization(message: types.Message, state: FSMContext):
 Интеллект - {data['intelligence']},
 Харизма - {data['charisma']},
 Мудрость - {data['wisdom']},
-<b>Предыстория</b>:
-<i>{data['background']}</i>
+Предыстория:
+{data['background']}
     ''')
-    await message.reply(await generate(f'''
-    Запомни, вот главный герой:
-    Имя - {data['name']}
-    Раса - {data['race']}
-    Класс - {data['char_class']}
-    Предыстория:
-    {data['background']}
-        ''', user_id=user_id))
     if current_state is None:
         return
     logging.info("Cancelling state %r", current_state)
@@ -312,6 +310,9 @@ async def complete_customization(message: types.Message, state: FSMContext):
         "Cancelled.",
         reply_markup=ReplyKeyboardRemove(),
     )
+
+text = ''
+
 
 
 @dp.message()
@@ -322,14 +323,22 @@ async def echo_handler(message: Message) -> None:
     By default, message handler will handle all message types (like a text, photo, sticker etc.)
     """
     try:
-        # Send a copy of the received message
+        main_kb = InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text = "получить картинку", callback_data="get_image"),]],)
         await save(message.text)
-        await message.reply(await generate(message.text, user_id=message.from_user.id))
+        global text
+        text = await generate(message.text, user_id=message.from_user.id)
+        await message.reply(text, reply_markup=main_kb)
     except TypeError:
         # But not all the types is supported to be copied so need to handle it
         await message.answer("Nice try!")
 
-
+# # Обработчик callback запросов
+@dp.callback_query(lambda c: c.data == 'get_image')
+async def process_callback_get_image(callback: types.CallbackQuery):
+    global text
+    await callback.answer(f"Отправляю вам картинку...")
+    await callback.message.answer(f"Отправляю вам картинку...{await generate_image(text)}")
+    # Здесь можно добавить код для отправки картинки
 async def main() -> None:
     # Initialize Bot instance with default bot properties which will be passed to all API calls
     bot = Bot(token=TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))

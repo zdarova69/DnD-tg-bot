@@ -32,7 +32,7 @@ async def findbest(contx, n):
     return list(zip(*sentence_combinations[:n]))[1]
 
 
-async def generate(context, user_id, remember=1):
+async def generate(context,user_id, remember=1):
     await save(txt=context)
     intro = "\n".join(await findbest(context, remember)) + "\n"
     text = intro + context
@@ -44,4 +44,4 @@ async def main(txt):
     await generate(context=txt)
 
 
-# asyncio.run(main('в траве сидел кузнечик'))
+#asyncio.run(main('в траве сидел кузнечик'))
