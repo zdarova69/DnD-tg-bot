@@ -54,6 +54,7 @@ class CharacterCreation(StatesGroup):
     charisma = State()
     background = State()
     finish = State()
+    
 
 
 @dp.message(Command('create_character'))
@@ -86,7 +87,7 @@ async def process_name(message: Message, state: FSMContext) -> None:
             resize_keyboard=True,
         ),
     )
-
+i = 70
 
 @dp.message(CharacterCreation.char_class)
 async def process_race(message: types.Message, state: FSMContext):
@@ -126,57 +127,114 @@ async def process_strength(message: types.Message, state: FSMContext):
     )
 
 
+
 @dp.message(CharacterCreation.agility)
 async def process_agility(message: types.Message, state: FSMContext):
+    global i  # Объявляем, что будем использовать глобальную переменную i
+    try:
+        value = int(message.text)  # Преобразуем текст в целое число
+        i -= value  # Вычитаем значение из i
+    except ValueError:
+        await message.reply(f"Ошибка: текст не является целым числом")
+    await state.update_data(agility=int(message.text))
     await state.update_data(strength=int(message.text))
+    await state.update_data(i=i)
     await state.set_state(CharacterCreation.dexterity)
     await message.answer(
-        "Укажи ловкость:",
+        f"Укажи ловкость: (осталось {i} очков)",
         reply_markup=ReplyKeyboardRemove(),
-
     )
 
 
 @dp.message(CharacterCreation.dexterity)
 async def process_dexterity(message: types.Message, state: FSMContext):
+    global i  # Объявляем, что будем использовать глобальную переменную i
+    try:
+        value = int(message.text)  # Преобразуем текст в целое число
+        i -= value  # Вычитаем значение из i
+    except ValueError:
+        await message.reply(f"Ошибка: текст не является целым числом")
     await state.update_data(agility=int(message.text))
+    await state.update_data(i=i)
     await state.set_state(CharacterCreation.constitution)
-    await message.reply("Укажи выносливость:")
+    await message.reply(f"Укажи выносливость: (осталось {i} очков)")
 
 
 @dp.message(CharacterCreation.constitution)
 async def process_constitution(message: types.Message, state: FSMContext):
+    global i  # Объявляем, что будем использовать глобальную переменную i
+    try:
+        value = int(message.text)  # Преобразуем текст в целое число
+        i -= value  # Вычитаем значение из i
+    except ValueError:
+        await message.reply(f"Ошибка: текст не является целым числом")
+    await state.update_data(agility=int(message.text))
+    await state.update_data(agility=int(message.text))
     await state.update_data(dexterity=int(message.text))
+    await state.update_data(i=i)
     await state.set_state(CharacterCreation.intelligence)
-    await message.reply("Укажи живучесть:")
+    await message.reply(f"Укажи живучесть: (осталось {i} очков)")
 
 
 @dp.message(CharacterCreation.intelligence)
 async def process_intelligence(message: types.Message, state: FSMContext):
+    global i  # Объявляем, что будем использовать глобальную переменную i
+    try:
+        value = int(message.text)  # Преобразуем текст в целое число
+        i -= value  # Вычитаем значение из i
+    except ValueError:
+        await message.reply(f"Ошибка: текст не является целым числом")
+    await state.update_data(agility=int(message.text))
+    await state.update_data(agility=int(message.text))
     await state.update_data(constitution=int(message.text))
+    await state.update_data(i=i)
     await state.set_state(CharacterCreation.charisma)
-    await message.reply("Укажи интеллект:")
+    await message.reply(f"Укажи интеллект: (осталось {i} очков)")
 
 
 @dp.message(CharacterCreation.charisma)
-async def process_intelligence(message: types.Message, state: FSMContext):
+async def process_charisma(message: types.Message, state: FSMContext):
+    global i  # Объявляем, что будем использовать глобальную переменную i
+    try:
+        value = int(message.text)  # Преобразуем текст в целое число
+        i -= value  # Вычитаем значение из i
+    except ValueError:
+        await message.reply(f"Ошибка: текст не является целым числом")
+    await state.update_data(agility=int(message.text))
     await state.update_data(intelligence=int(message.text))
+    await state.update_data(i=i)
     await state.set_state(CharacterCreation.wisdom)
-    await message.reply("Укажи харизму:")
+    await message.reply(f"Укажи харизму: (осталось {i} очков)")
 
 
 @dp.message(CharacterCreation.wisdom)
-async def process_intelligence(message: types.Message, state: FSMContext):
+async def process_wisdom(message: types.Message, state: FSMContext):
+    global i  # Объявляем, что будем использовать глобальную переменную i
+    try:
+        value = int(message.text)  # Преобразуем текст в целое число
+        i -= value  # Вычитаем значение из i
+    except ValueError:
+        await message.reply(f"Ошибка: текст не является целым числом")
+    await state.update_data(agility=int(message.text))
     await state.update_data(charisma=int(message.text))
+    await state.update_data(i=i)
     await state.set_state(CharacterCreation.background)
-    await message.reply("Укажи мудрость:")
+    await message.reply(f"Укажи мудрость: (осталось {i} очков)")
 
 
 @dp.message(CharacterCreation.background)
 async def process_background(message: types.Message, state: FSMContext):
+    global i  # Объявляем, что будем использовать глобальную переменную i
+    try:
+        value = int(message.text)  # Преобразуем текст в целое число
+        i -= value  # Вычитаем значение из i
+    except ValueError:
+        await message.reply(f"Ошибка: текст не является целым числом")
+    await state.update_data(agility=int(message.text))
     await state.update_data(wisdom=int(message.text))
+    await state.update_data(i=i)
     await state.set_state(CharacterCreation.finish)
-    await message.reply("А теперь подумай, какая у твоего героя была предыстория, и напиши её сюда.")
+    await message.reply(f"Укажи предысторию: (осталось {i} очков)")
 
 
 @dp.message(CharacterCreation.finish)
@@ -189,6 +247,7 @@ async def complete_customization(message: types.Message, state: FSMContext):
         'race': data['race'],
         'class': data['char_class'],
         'strength': data['strength'],
+        'agility': data['agility'],
         'dexterity': data['dexterity'],
         'constitution': data['constitution'],
         'intelligence': data['intelligence'],
@@ -201,28 +260,28 @@ async def complete_customization(message: types.Message, state: FSMContext):
 
     await message.reply("Подождите...")
     current_state = await state.get_state()
-    await generate(f'''
-    Запомни, вот главный герой:
-    Имя - {data['name']}
-    Раса - {data['race']}
-    Класс - {data['char_class']}
-    Предыстория:
-    {data['background']}
-    ''')
+    await message.reply(await generate(f'''
+Запомни, вот главный герой:
+Имя - {data['name']}
+Раса - {data['race']}
+Класс - {data['char_class']}
+Предыстория:
+{data['background']}
+    ''', user_id=user_id))
     await message.reply(f'''
-    Персонаж создан и сохранен!
-    Имя - {data['name']},
-    Раса - {data['race']},
-    Класс - {data['char_class']},
-    Сила - {data['strength']},
-    Ловкость - {data['agility']},
-    Выносливость - {data['dexterity']},
-    Живучесть - {data['constitution']},
-    Интеллект - {data['intelligence']},
-    Харизма - {data['charisma']},
-    Мудрость - {data['wisdom']},
-    Предыстория:
-    {data['background']}
+Персонаж создан и сохранен!
+Имя - {data['name']},
+Раса - {data['race']},
+Класс - {data['char_class']},
+Сила - {data['strength']},
+Ловкость - {data['agility']},
+Выносливость - {data['dexterity']},
+Живучесть - {data['constitution']},
+Интеллект - {data['intelligence']},
+Харизма - {data['charisma']},
+Мудрость - {data['wisdom']},
+Предыстория:
+{data['background']}
     ''')
     if current_state is None:
         return
@@ -244,7 +303,7 @@ async def echo_handler(message: Message) -> None:
     try:
         # Send a copy of the received message
         await save(message.text)
-        await message.reply(await generate(message.text))
+        await message.reply(await generate(message.text, user_id=message.from_user.id))
     except TypeError:
         # But not all the types is supported to be copied so need to handle it
         await message.answer("Nice try!")

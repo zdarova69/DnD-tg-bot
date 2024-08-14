@@ -6,8 +6,8 @@ from cl import client
 
 
 
-async def generate_message(prompt):
-    exodus = await action(prompt)
+async def generate_message(prompt, user_id):
+    exodus = await action(prompt, user_id)
     prompt = prompt + exodus
     print(prompt)
     chat_completion = client.chat.completions.create(

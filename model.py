@@ -32,10 +32,11 @@ async def findbest(contx, n):
     return list(zip(*sentence_combinations[:n]))[1]
 
 
-async def generate(context, remember=1):
+async def generate(context,user_id, remember=1):
+    await save(txt=context)
     intro = "\n".join(await findbest(context, remember)) + "\n"
     text = intro + context
-    return await generate_message(text)
+    return await generate_message(text, user_id)
 
 
 async def main(txt):
