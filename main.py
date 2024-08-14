@@ -3,7 +3,6 @@ import logging
 import sys
 import json
 
-
 from aiogram import Bot, Dispatcher, types, F
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
@@ -12,9 +11,10 @@ from aiogram.types import Message
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
-from aiogram.types import ReplyKeyboardRemove, ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.types import ReplyKeyboardRemove, ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, \
+    InlineKeyboardButton
 # from gen_message import generate_message
-from translater import ru, en
+# from translater import ru, en
 from model import save, generate
 
 # Открываем файл в режиме чтения
@@ -25,7 +25,6 @@ with open('tg_api.txt', 'r') as file:
 # All handlers should be attached to the Router (or Dispatcher)
 
 dp = Dispatcher()
-
 
 
 @dp.message(CommandStart())
@@ -41,47 +40,37 @@ async def command_start_handler(message: Message) -> None:
     greeting = '''Привет, я DnD бот. могу придумать тебе историю'''
     await message.answer(greeting)
 
+
 class CharacterCreation(StatesGroup):
     name = State()
     race = State()
     char_class = State()
     strength = State()
+    agility = State()
     dexterity = State()
     constitution = State()
     intelligence = State()
     wisdom = State()
     charisma = State()
+    background = State()
+    finish = State()
+
 
 @dp.message(Command('create_character'))
 async def command_start(message: Message, state: FSMContext) -> None:
-    await state.set_state(CharacterCreation.name)
-    await message.answer(
-        "Давай придумаем имя персонажа",
-    )
-# @dp.message(Command("cancel"))
-# @dp.message(F.text.casefold() == "cancel")
+    await state.set_state(CharacterCreation.race)
+    await message.answer("Как зовут главного героя?")
 
-# async def cancel_handler(message: Message, state: FSMContext) -> None:
-#     """
-#     Allow user to cancel any action
-#     """
-#     current_state = await state.get_state()
-#     if current_state is None:
-#        return
-#     logging.info("Cancelling state %r", current_state)
-#     await state.clear()
-#     await message.answer(
-#         "Cancelled.",
-#     )
-@dp.message(CharacterCreation.name)
+
+@dp.message(CharacterCreation.race)
 async def process_name(message: Message, state: FSMContext) -> None:
     await state.update_data(name=message.text)
-    await state.set_state(CharacterCreation.race)
+    await state.set_state(CharacterCreation.char_class)
     await message.answer(
         f"выбери расу",
         reply_markup=ReplyKeyboardMarkup(
             keyboard=[
-                [   
+                [
                     KeyboardButton(text="🧝‍♂️ человек"),
                     KeyboardButton(text="🧝🏻‍♂️ эльф"),
                     KeyboardButton(text="🧝‍♀️ полуэльф"),
@@ -98,15 +87,16 @@ async def process_name(message: Message, state: FSMContext) -> None:
         ),
     )
 
-@dp.message(CharacterCreation.race)
+
+@dp.message(CharacterCreation.char_class)
 async def process_race(message: types.Message, state: FSMContext):
     await state.update_data(race=message.text)
-    await state.set_state(CharacterCreation.char_class)
+    await state.set_state(CharacterCreation.strength)
     await message.answer(
         f"выбери класс",
         reply_markup=ReplyKeyboardMarkup(
             keyboard=[
-                [   
+                [
                     KeyboardButton(text="⚔️ воин"),
                     KeyboardButton(text="🪓 варвар"),
                     KeyboardButton(text="🎵 бард"),
@@ -125,10 +115,10 @@ async def process_race(message: types.Message, state: FSMContext):
     )
 
 
-@dp.message(CharacterCreation.char_class)
-async def process_class(message: types.Message, state: FSMContext):
+@dp.message(CharacterCreation.strength)
+async def process_strength(message: types.Message, state: FSMContext):
     await state.update_data(char_class=message.text)
-    await state.set_state(CharacterCreation.strength)
+    await state.set_state(CharacterCreation.agility)
     await message.answer(
         "Укажи силу:",
         reply_markup=ReplyKeyboardRemove(),
@@ -136,8 +126,8 @@ async def process_class(message: types.Message, state: FSMContext):
     )
 
 
-@dp.message(CharacterCreation.strength)
-async def process_strength(message: types.Message, state: FSMContext):
+@dp.message(CharacterCreation.agility)
+async def process_agility(message: types.Message, state: FSMContext):
     await state.update_data(strength=int(message.text))
     await state.set_state(CharacterCreation.dexterity)
     await message.answer(
@@ -145,41 +135,53 @@ async def process_strength(message: types.Message, state: FSMContext):
         reply_markup=ReplyKeyboardRemove(),
 
     )
-    
+
 
 @dp.message(CharacterCreation.dexterity)
 async def process_dexterity(message: types.Message, state: FSMContext):
-    await state.update_data(dexterity=int(message.text))
+    await state.update_data(agility=int(message.text))
     await state.set_state(CharacterCreation.constitution)
     await message.reply("Укажи выносливость:")
-    
+
 
 @dp.message(CharacterCreation.constitution)
 async def process_constitution(message: types.Message, state: FSMContext):
-    await state.update_data(constitution=int(message.text))
+    await state.update_data(dexterity=int(message.text))
     await state.set_state(CharacterCreation.intelligence)
-    await message.reply("Укажи интеллект:")
-    
+    await message.reply("Укажи живучесть:")
+
 
 @dp.message(CharacterCreation.intelligence)
 async def process_intelligence(message: types.Message, state: FSMContext):
-    await state.update_data(intelligence=int(message.text))
+    await state.update_data(constitution=int(message.text))
     await state.set_state(CharacterCreation.charisma)
-    await message.reply("Укажи хаоизму:")
+    await message.reply("Укажи интеллект:")
 
 
 @dp.message(CharacterCreation.charisma)
 async def process_intelligence(message: types.Message, state: FSMContext):
-    await state.update_data(charisma=int(message.text))
+    await state.update_data(intelligence=int(message.text))
     await state.set_state(CharacterCreation.wisdom)
-    await message.reply("Укажи мудрость:")
+    await message.reply("Укажи харизму:")
 
 
 @dp.message(CharacterCreation.wisdom)
-async def process_wisdom(message: types.Message, state: FSMContext):
-    await state.update_data(wisdom=int(message.text))
-    await state.set_state(CharacterCreation.wisdom)
+async def process_intelligence(message: types.Message, state: FSMContext):
+    await state.update_data(charisma=int(message.text))
+    await state.set_state(CharacterCreation.background)
+    await message.reply("Укажи мудрость:")
 
+
+@dp.message(CharacterCreation.background)
+async def process_background(message: types.Message, state: FSMContext):
+    await state.update_data(wisdom=int(message.text))
+    await state.set_state(CharacterCreation.finish)
+    await message.reply("А теперь подумай, какая у твоего героя была предыстория, и напиши её сюда.")
+
+
+@dp.message(CharacterCreation.finish)
+async def complete_customization(message: types.Message, state: FSMContext):
+    await state.update_data(background=message.text)
     data = await state.get_data()
     user_id = message.from_user.id
     character = {
@@ -190,39 +192,47 @@ async def process_wisdom(message: types.Message, state: FSMContext):
         'dexterity': data['dexterity'],
         'constitution': data['constitution'],
         'intelligence': data['intelligence'],
+        'charisma': data['charisma'],
         'wisdom': data['wisdom']
     }
 
     with open(f'characters_{user_id}.json', 'w', encoding='utf-8') as f:
         json.dump(character, f, ensure_ascii=False)
 
-    await message.reply("Персонаж создан и сохранен!")
+    await message.reply("Подождите...")
     current_state = await state.get_state()
-
+    await generate(f'''
+    Запомни, вот главный герой:
+    Имя - {data['name']}
+    Раса - {data['race']}
+    Класс - {data['char_class']}
+    Предыстория:
+    {data['background']}
+    ''')
+    await message.reply(f'''
+    Персонаж создан и сохранен!
+    Имя - {data['name']},
+    Раса - {data['race']},
+    Класс - {data['char_class']},
+    Сила - {data['strength']},
+    Ловкость - {data['agility']},
+    Выносливость - {data['dexterity']},
+    Живучесть - {data['constitution']},
+    Интеллект - {data['intelligence']},
+    Харизма - {data['charisma']},
+    Мудрость - {data['wisdom']},
+    Предыстория:
+    {data['background']}
+    ''')
     if current_state is None:
         return
     logging.info("Cancelling state %r", current_state)
     await state.clear()
-stats = {
-    'сила': 10,
-    'выносливость': 0,
-    'интеллект': 0,
-    'мудрость': 10,
-    'харизма': 10,
-}
+    await message.answer(
+        "Cancelled.",
+        reply_markup=ReplyKeyboardRemove(),
+    )
 
-
-@dp.message(Command("stats"))
-async def stats_show(message: Message):
-    stats_message = f'''
-Характеристики:
-Сила - {stats['сила']} очк.
-Выносливость - {stats['выносливость']} очк.
-Интеллект - {stats['интеллект']} очк.
-Мудрость - {stats['мудрость']} очк.
-Харизма - {stats['харизма']} очк.
-    '''
-    await message.reply(stats_message)
 
 @dp.message()
 async def echo_handler(message: Message) -> None:
