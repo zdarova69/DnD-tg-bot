@@ -87,7 +87,7 @@ async def process_name(message: Message, state: FSMContext) -> None:
             resize_keyboard=True,
         ),
     )
-i = 70
+
 
 @dp.message(CharacterCreation.char_class)
 async def process_race(message: types.Message, state: FSMContext):
@@ -115,13 +115,14 @@ async def process_race(message: types.Message, state: FSMContext):
         ),
     )
 
+i = 60
 
 @dp.message(CharacterCreation.strength)
 async def process_strength(message: types.Message, state: FSMContext):
     await state.update_data(char_class=message.text)
     await state.set_state(CharacterCreation.agility)
     await message.answer(
-        "Укажи силу:",
+        f"Укажи силу: максимум 18\n(осталось {i} очков)",
         reply_markup=ReplyKeyboardRemove(),
 
     )
@@ -131,111 +132,128 @@ async def process_strength(message: types.Message, state: FSMContext):
 @dp.message(CharacterCreation.agility)
 async def process_agility(message: types.Message, state: FSMContext):
     global i  # Объявляем, что будем использовать глобальную переменную i
-    try:
+    try:    
         value = int(message.text)  # Преобразуем текст в целое число
-        i -= value  # Вычитаем значение из i
-    except ValueError:
-        await message.reply(f"Ошибка: текст не является целым числом")
-    await state.update_data(agility=int(message.text))
-    await state.update_data(strength=int(message.text))
-    await state.update_data(i=i)
-    await state.set_state(CharacterCreation.dexterity)
-    await message.answer(
-        f"Укажи ловкость: (осталось {i} очков)",
-        reply_markup=ReplyKeyboardRemove(),
+        if value > 18 or value > i:      
+            100 / 0
+        else:
+            i -= value  # Вычитаем значение из i    
+            await state.update_data(agility=value)
+            await state.update_data(strength=value)
+            await state.update_data(i=i)
+            await state.set_state(CharacterCreation.dexterity)
+            await message.answer(
+        f"Укажи ловкость: максимум 18\n(осталось {i} очков)",
+        reply_markup=types.ReplyKeyboardRemove(),
     )
+    except (ValueError, ZeroDivisionError) as e:
+        await message.reply(f"Ошибка: текст не является целым числом")
+    
+ 
 
 
 @dp.message(CharacterCreation.dexterity)
 async def process_dexterity(message: types.Message, state: FSMContext):
     global i  # Объявляем, что будем использовать глобальную переменную i
-    try:
+    try:    
         value = int(message.text)  # Преобразуем текст в целое число
-        i -= value  # Вычитаем значение из i
-    except ValueError:
+        if value > 18 or value > i:      
+            100 / 0
+        else:
+            i -= value  # Вычитаем значение из i
+            await state.update_data(agility=int(message.text))
+            await state.update_data(i=i)
+            await state.set_state(CharacterCreation.constitution)
+            await message.reply(f"Укажи выносливость: максимум 18\n(осталось {i} очков)")   
+    except (ValueError, ZeroDivisionError) as e:
         await message.reply(f"Ошибка: текст не является целым числом")
-    await state.update_data(agility=int(message.text))
-    await state.update_data(i=i)
-    await state.set_state(CharacterCreation.constitution)
-    await message.reply(f"Укажи выносливость: (осталось {i} очков)")
+    
 
 
 @dp.message(CharacterCreation.constitution)
 async def process_constitution(message: types.Message, state: FSMContext):
     global i  # Объявляем, что будем использовать глобальную переменную i
-    try:
+    try:    
         value = int(message.text)  # Преобразуем текст в целое число
-        i -= value  # Вычитаем значение из i
-    except ValueError:
+        if value > 18 or value > i:      
+            100 / 0
+        else:
+            i -= value  # Вычитаем значение из i
+            await state.update_data(agility=int(message.text))
+            await state.update_data(agility=int(message.text))
+            await state.update_data(dexterity=int(message.text))
+            await state.update_data(i=i)
+            await state.set_state(CharacterCreation.intelligence)
+            await message.reply(f"Укажи живучесть: максимум 18\n(осталось {i} очков)")
+    except (ValueError, ZeroDivisionError) as e:
         await message.reply(f"Ошибка: текст не является целым числом")
-    await state.update_data(agility=int(message.text))
-    await state.update_data(agility=int(message.text))
-    await state.update_data(dexterity=int(message.text))
-    await state.update_data(i=i)
-    await state.set_state(CharacterCreation.intelligence)
-    await message.reply(f"Укажи живучесть: (осталось {i} очков)")
+    
 
 
 @dp.message(CharacterCreation.intelligence)
 async def process_intelligence(message: types.Message, state: FSMContext):
     global i  # Объявляем, что будем использовать глобальную переменную i
-    try:
+    try:    
         value = int(message.text)  # Преобразуем текст в целое число
-        i -= value  # Вычитаем значение из i
-    except ValueError:
+        if value > 18 or value > i:      
+            100 / 0
+        else:
+            i -= value  # Вычитаем значение из i
+            await state.update_data(agility=int(message.text))
+            await state.update_data(agility=int(message.text))
+            await state.update_data(constitution=int(message.text))
+            await state.update_data(i=i)
+            await state.set_state(CharacterCreation.charisma)
+            await message.reply(f"Укажи интеллект: максимум 18\n(осталось {i} очков)")   
+    except (ValueError, ZeroDivisionError) as e:
         await message.reply(f"Ошибка: текст не является целым числом")
-    await state.update_data(agility=int(message.text))
-    await state.update_data(agility=int(message.text))
-    await state.update_data(constitution=int(message.text))
-    await state.update_data(i=i)
-    await state.set_state(CharacterCreation.charisma)
-    await message.reply(f"Укажи интеллект: (осталось {i} очков)")
+    
 
 
 @dp.message(CharacterCreation.charisma)
 async def process_charisma(message: types.Message, state: FSMContext):
     global i  # Объявляем, что будем использовать глобальную переменную i
-    try:
+    try:    
         value = int(message.text)  # Преобразуем текст в целое число
-        i -= value  # Вычитаем значение из i
-    except ValueError:
+        if value > 18 or value > i:      
+            100 / 0
+        else:
+            i -= value  # Вычитаем значение из i
+            await state.update_data(agility=int(message.text))
+            await state.update_data(intelligence=int(message.text))
+            await state.update_data(i=i)
+            await state.set_state(CharacterCreation.wisdom)
+            await message.reply(f"Укажи харизму: максимум 18\n(осталось {i} очков)")
+    except (ValueError, ZeroDivisionError) as e:
         await message.reply(f"Ошибка: текст не является целым числом")
-    await state.update_data(agility=int(message.text))
-    await state.update_data(intelligence=int(message.text))
-    await state.update_data(i=i)
-    await state.set_state(CharacterCreation.wisdom)
-    await message.reply(f"Укажи харизму: (осталось {i} очков)")
+    
 
 
 @dp.message(CharacterCreation.wisdom)
 async def process_wisdom(message: types.Message, state: FSMContext):
     global i  # Объявляем, что будем использовать глобальную переменную i
-    try:
+    try:    
         value = int(message.text)  # Преобразуем текст в целое число
-        i -= value  # Вычитаем значение из i
-    except ValueError:
-        await message.reply(f"Ошибка: текст не является целым числом")
-    await state.update_data(agility=int(message.text))
-    await state.update_data(charisma=int(message.text))
-    await state.update_data(i=i)
-    await state.set_state(CharacterCreation.background)
-    await message.reply(f"Укажи мудрость: (осталось {i} очков)")
-
+        if value > 18 or value > i:      
+            100 / 0
+        else:
+            i -= value  # Вычитаем значение из i
+            await state.update_data(agility=int(message.text))
+            await state.update_data(charisma=int(message.text))
+            await state.update_data(i=i)
+            await state.set_state(CharacterCreation.background)
+            await message.reply(f"Укажи мудрость: максимум 18\n(осталось {i} очков)")
+    except (ValueError, ZeroDivisionError) as e:
+        await message.reply(f"Ошибка: текст не является целым числом")  
+    await message.reply("Укажи мудрость:")
 
 @dp.message(CharacterCreation.background)
 async def process_background(message: types.Message, state: FSMContext):
-    global i  # Объявляем, что будем использовать глобальную переменную i
-    try:
-        value = int(message.text)  # Преобразуем текст в целое число
-        i -= value  # Вычитаем значение из i
-    except ValueError:
-        await message.reply(f"Ошибка: текст не является целым числом")
-    await state.update_data(agility=int(message.text))
     await state.update_data(wisdom=int(message.text))
-    await state.update_data(i=i)
     await state.set_state(CharacterCreation.finish)
-    await message.reply(f"Укажи предысторию: (осталось {i} очков)")
+    await message.reply("А теперь подумай, какая у твоего героя была предыстория, и напиши её сюда.")
 
+    
 
 @dp.message(CharacterCreation.finish)
 async def complete_customization(message: types.Message, state: FSMContext):
